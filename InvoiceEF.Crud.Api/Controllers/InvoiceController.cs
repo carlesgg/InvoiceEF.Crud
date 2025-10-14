@@ -1,57 +1,54 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using InvoiceEF.Crud.Application.Services.Contracts;
-using InvoiceEF.Crud.Domain;
-
+using InvoiceEF.Crud.Domain.Entities;
 
 namespace InvoiceEF.Crud.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class InvoiceController(IStudentService studentService) : ControllerBase
+    public class InvoiceController(IInvoiceService invoiceService) : ControllerBase
     {
-        private readonly IStudentService _studentService = studentService;
+        private readonly IInvoiceService _invoiceService = invoiceService;
 
-        // GET: api/<StudentController> (GET ALL)
+        // GET: api/<InvoiceController>
         [HttpGet]
-        public async Task<IEnumerable<StudentTest>> Get(CancellationToken cancellationToken)
+        public async Task<IEnumerable<Invoice>> Get(CancellationToken cancellationToken)
         {
-            return await _studentService.GetAllAsync(cancellationToken);
+            return await _invoiceService.GetAllAsync(cancellationToken);
         }
 
-        // GET api/<StudentController>/5 (GET BY ID)
+        // GET api/<InvoiceController>/5
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
         {
-            var student = await _studentService.GetByIdAsync(id, cancellationToken);
-            if (student == null)
+            var invoice = await _invoiceService.GetByIdAsync(id, cancellationToken);
+            if (invoice == null)
                 return NotFound();
 
-            return Ok(student);
+            return Ok(invoice);
         }
 
-
-        // POST api/<StudentController> (CREATE)
+        // POST api/<InvoiceController>
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] StudentTest student, CancellationToken cancellationToken)
+        public async Task<IActionResult> Post([FromBody] Invoice invoice, CancellationToken cancellationToken)
         {
-            bool result = await _studentService.AddAsync(student, cancellationToken);
+            bool result = await _invoiceService.AddAsync(invoice, cancellationToken);
 
             if (result)
                 return StatusCode(201); // 201 Created
 
-            return BadRequest("Failed to create student.");
+            return BadRequest("Failed to create invoice.");
         }
 
-
-        // PUT api/<StudentController>/5 (UPDATE)
+        // PUT api/<InvoiceController>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] StudentTest student, CancellationToken cancellationToken)
+        public async Task<IActionResult> Put(int id, [FromBody] Invoice invoice, CancellationToken cancellationToken)
         {
-            if (id != student.Id)
+            if (id != invoice.InvoiceId)
                 return BadRequest("ID mismatch");
 
-            bool updated = await _studentService.UpdateAsync(student, cancellationToken);
+            bool updated = await _invoiceService.UpdateAsync(invoice, cancellationToken);
 
             if (updated)
                 return Ok();
@@ -59,17 +56,15 @@ namespace InvoiceEF.Crud.Api.Controllers
                 return NotFound();
         }
 
-
-        // DELETE api/<StudentController>/5 (DELETE)
+        // DELETE api/<InvoiceController>/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
-            bool result = await _studentService.DeleteAsync(id, cancellationToken);
+            bool result = await _invoiceService.DeleteAsync(id, cancellationToken);
             if (result)
-                return Ok();  // 200 OK If successfully deleted
+                return Ok();
             else
-                return NotFound();  // 404 If the student was not found
+                return NotFound();
         }
-
     }
 }

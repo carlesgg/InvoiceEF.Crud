@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using InvoiceEF.Crud.Infrastructure.Data.Contracts;
 
-namespace InvoiceEF.Crud.Infrastructure.Repositories.Implementations
+namespace InvoiceEF.Crud.Infrastructure.Context
 {
     public class SqlConnectionFactory(IConfiguration configuration) : ISqlConnectionFactory
     {

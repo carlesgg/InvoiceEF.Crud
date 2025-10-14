@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using InvoiceEF.Crud.Infrastructure.Repositories.Contracts;
+using InvoiceEF.Crud.Domain.Contracts;
 using InvoiceEF.Crud.Infrastructure.Repositories.Implementations;
+using InvoiceEF.Crud.Infrastructure.Data.Contracts;
 
 namespace InvoiceEF.Crud.Infrastructure.Repositories.Extensions
 {
@@ -15,8 +16,8 @@ namespace InvoiceEF.Crud.Infrastructure.Repositories.Extensions
         {
             // Register services here
             // e.g., services.AddTransient<IMyOtherService, MyOtherService>();
-            services
-                .AddScoped<IStudentRepository, StudentRepository>();
+            //services
+                //.AddScoped<IStudentRepository, StudentRepository>();
             services
                 .AddSingleton<ISqlConnectionFactory, SqlConnectionFactory>();
         }

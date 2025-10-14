@@ -8,17 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.2" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.9" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\InvoiceEF.Crud.CrossCutting\InvoiceEF.Crud.CrossCutting.csproj" />
-    <ProjectReference Include="..\InvoiceEF.Crud.Domain.Contracts\InvoiceEF.Crud.Domain.Contracts.csproj" />
     <ProjectReference Include="..\InvoiceEF.Crud.Domain.Services\InvoiceEF.Crud.Domain.Services.csproj" />
     <ProjectReference Include="..\InvoiceEF.Crud.Domain\InvoiceEF.Crud.Domain.Entities.csproj" />
-    <ProjectReference Include="..\InvoiceEF.Crud.Infrastructure.Data\InvoiceEF.Crud.Infrastructure.Data.csproj" />
-    <ProjectReference Include="..\InvoiceEF.Crud.Infrastructure.Proxies\InvoiceEF.Crud.Infrastructure.Proxies.csproj" />
   </ItemGroup>
 
 </Project>

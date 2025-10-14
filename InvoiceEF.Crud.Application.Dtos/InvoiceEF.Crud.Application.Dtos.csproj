@@ -7,13 +7,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Response\" />
-    <Folder Include="Request\" />
+    <Compile Remove="Request\**" />
+    <EmbeddedResource Remove="Request\**" />
+    <None Remove="Request\**" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\InvoiceEF.Crud.Domain\InvoiceEF.Crud.Domain.Entities.csproj" />
     <ProjectReference Include="..\InvoiceEF.Crud.Infrastructure.Repositories\InvoiceEF.Crud.Infrastructure.Repositories.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Requests\Client\" />
+    <Folder Include="Requests\Company\" />
+    <Folder Include="Requests\Invoice\" />
+    <Folder Include="Requests\InvoiceLine\" />
+    <Folder Include="Responses\Client\" />
+    <Folder Include="Responses\Company\" />
+    <Folder Include="Responses\Invoice\" />
+    <Folder Include="Responses\InvoiceLine\" />
   </ItemGroup>
 
 </Project>

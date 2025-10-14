@@ -15,9 +15,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\InvoiceEF.Crud.Application.Services\InvoiceEF.Crud.Application.Services.csproj" />
-    <ProjectReference Include="..\InvoiceEF.Crud.Domain\InvoiceEF.Crud.Domain.csproj" />
     <ProjectReference Include="..\InvoiceEF.Crud.Application.Services\InvoiceEF.Crud.Application.Services.csproj" />
-    <ProjectReference Include="..\InvoiceEF.Crud.Domain\InvoiceEF.Crud.Domain.csproj" />
+    <ProjectReference Include="..\InvoiceEF.Crud.CrossCutting\InvoiceEF.Crud.CrossCutting.csproj" />
   </ItemGroup>
 
 </Project>
