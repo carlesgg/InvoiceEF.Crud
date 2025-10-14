@@ -11,60 +11,70 @@ namespace InvoiceEF.Crud.Api.Controllers
     {
         private readonly IInvoiceService _invoiceService = invoiceService;
 
-        // GET: api/<InvoiceController>
+        // GET: api/Invoice
         [HttpGet]
-        public async Task<IEnumerable<Invoice>> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
-            return await _invoiceService.GetAllAsync(cancellationToken);
+            var result = await _invoiceService.GetInvoices(cancellationToken);
+
+            if (result.HasErrors)
+                return BadRequest(result.Errors);
+
+            return Ok(result.Result);
         }
 
-        // GET api/<InvoiceController>/5
+        // GET: api/Invoice/{id}
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
         {
-            var invoice = await _invoiceService.GetByIdAsync(id, cancellationToken);
-            if (invoice == null)
-                return NotFound();
+            var result = await _invoiceService.GetInvoiceById(id, cancellationToken);
 
-            return Ok(invoice);
+            if (result.HasErrors || result.Result == null)
+                return NotFound(result.Errors.Count > 0 ? result.Errors : null);
+
+            return Ok(result.Result);
         }
 
-        // POST api/<InvoiceController>
+        // POST: api/Invoice
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Invoice invoice, CancellationToken cancellationToken)
         {
-            bool result = await _invoiceService.AddAsync(invoice, cancellationToken);
+            if (invoice == null)
+                return BadRequest("Invoice cannot be null.");
 
-            if (result)
-                return StatusCode(201); // 201 Created
+            var result = await _invoiceService.AddInvoice(invoice, cancellationToken);
 
-            return BadRequest("Failed to create invoice.");
+            if (result.HasErrors || result.Result == null)
+                return BadRequest(result.Errors);
+
+            return CreatedAtAction(nameof(Get), new { id = result.Result.InvoiceId }, result.Result);
         }
 
-        // PUT api/<InvoiceController>/5
+        // PUT: api/Invoice/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Invoice invoice, CancellationToken cancellationToken)
+        public async Task<IActionResult> Put(Guid id, [FromBody] Invoice invoice, CancellationToken cancellationToken)
         {
             if (id != invoice.InvoiceId)
-                return BadRequest("ID mismatch");
+                return BadRequest("ID mismatch.");
 
-            bool updated = await _invoiceService.UpdateAsync(invoice, cancellationToken);
+            var result = await _invoiceService.UpdateInvoice(invoice, cancellationToken);
 
-            if (updated)
-                return Ok();
-            else
-                return NotFound();
+            if (result.HasErrors || result.Result == null)
+                return NotFound(result.Errors.Count > 0 ? result.Errors : null);
+
+            return Ok(result.Result);
         }
 
-        // DELETE api/<InvoiceController>/5
+        // DELETE: api/Invoice/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
-            bool result = await _invoiceService.DeleteAsync(id, cancellationToken);
-            if (result)
-                return Ok();
-            else
-                return NotFound();
+            var result = await _invoiceService.DeleteInvoice(id, cancellationToken);
+
+            if (result.HasErrors || !result.Result)
+                return NotFound(result.Errors.Count > 0 ? result.Errors : null);
+
+            return Ok();
         }
     }
 }

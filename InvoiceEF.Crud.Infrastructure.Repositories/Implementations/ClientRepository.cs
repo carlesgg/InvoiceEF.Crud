@@ -1,113 +1,100 @@
-﻿using Microsoft.Data.SqlClient;
-using InvoiceEF.Crud.Domain.Entities;
+﻿using InvoiceEF.Crud.CrossCutting;
 using InvoiceEF.Crud.Domain.Contracts;
-using InvoiceEF.Crud.Infrastructure.Data.Contracts;
+using InvoiceEF.Crud.Domain.Entities;
+using InvoiceEF.Crud.Infrastructure.Context.Implementations;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace InvoiceEF.Crud.Infrastructure.Repositories.Implementations
 {
-    public class ClientRepository(ISqlConnectionFactory connectionFactory) : IClientRepository
+    public class ClientRepository(AppDbContext context) : IClientRepository
     {
-        private readonly ISqlConnectionFactory _connectionFactory = connectionFactory;
+        private readonly AppDbContext _context = context;
 
-        public async Task<IEnumerable<Client>> GetAllAsync(CancellationToken cancellationToken)
+        // Get all clients
+        public async Task<OperationResult<IEnumerable<Client>>> GetClients(CancellationToken cancellationToken)
         {
-            List<Client> _clients = [];
-            using var connection = _connectionFactory.CreateConnection();
-            await connection.OpenAsync(cancellationToken);
- 
-            using SqlCommand command = new("SELECT * FROM Clients", connection);
-            using var reader = await command.ExecuteReaderAsync(cancellationToken);
+            var clients = await _context.Clients.ToListAsync(cancellationToken);
+            return new OperationResult<IEnumerable<Client>>().AddResult(clients);
+        }
 
-            while (await reader.ReadAsync(cancellationToken))
+        // Get client by Id
+        public async Task<OperationResult<Client?>> GetClientById(Guid id, CancellationToken cancellationToken)
+        {
+            var client = await _context.Clients.FindAsync([id], cancellationToken);
+            return new OperationResult<Client?>().AddResult(client);
+        }
+
+        // Add client
+        public async Task<OperationResult<Client>> AddClient(Client client, CancellationToken cancellationToken)
+        {
+            var result = new OperationResult<Client>();
+
+            try
             {
-                var client = new Client
-                {
-                    ClientId = reader.GetInt32(0),
-                    Name = reader.GetString(1),
-                    Direction = reader.GetString(2),
-                    Email = reader.GetString(3),
-                    Phone = reader.GetString(4)
-                };
-                _clients.Add(client);
+                await _context.Clients.AddAsync(client, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+                result.AddResult(client);
             }
-            
-            return await Task.FromResult(_clients.AsEnumerable());
-        }
-
-        public async Task<Client?> GetByIdAsync(int id, CancellationToken cancellationToken)
-        {
-            Client? client = null;
-
-            using var connection = _connectionFactory.CreateConnection();
-            await connection.OpenAsync(cancellationToken);
-
-            using var command = new SqlCommand(
-                "SELECT ClientId, Name, Direction, Email, Phone FROM Clients WHERE ClientId = @Id", 
-                connection);
-            command.Parameters.AddWithValue("@Id", id);
-
-            using var reader = await command.ExecuteReaderAsync(cancellationToken);
-            if (await reader.ReadAsync(cancellationToken))
+            catch (Exception ex)
             {
-                client = new()
-                {
-                    ClientId = reader.GetInt32(0),
-                    Name = reader.GetString(1),
-                    Direction = reader.GetString(2),
-                    Email = reader.GetString(3),
-                    Phone = reader.GetString(4)
-                };
+                result.AddException(ex);
             }
-            return await Task.FromResult(client);
+
+            return result;
         }
 
-        public async Task<bool> UpdateAsync(Client client, CancellationToken cancellationToken)
+        // Update client
+        public async Task<OperationResult<Client>> UpdateClient(Client client, CancellationToken cancellationToken)
         {
-            using var connection = _connectionFactory.CreateConnection();
-            await connection.OpenAsync(cancellationToken);
+            // Fetch existing client first
+            var existingResult = await GetClientById(client.ClientId, cancellationToken);
 
-            using var command = new SqlCommand(
-                "UPDATE Clients SET Name = @Name, Direction = @Direction, Email = @Email, Phone = @Phone WHERE ClientId = @Id", 
-                connection);
+            if (existingResult.Result == null)
+            {
+                return new OperationResult<Client>().AddError(404, "Client not found");
+            }
 
-            command.Parameters.AddWithValue("@Id", client.ClientId);
-            command.Parameters.AddWithValue("@Name", client.Name);
-            command.Parameters.AddWithValue("@Direction", client.Direction);
-            command.Parameters.AddWithValue("@Email", client.Email);
-            command.Parameters.AddWithValue("@Phone", client.Phone);
+            var result = new OperationResult<Client>();
+            try
+            {
+                _context.Clients.Update(client);
+                await _context.SaveChangesAsync(cancellationToken);
+                result.AddResult(client);
+            }
+            catch (Exception ex)
+            {
+                result.AddException(ex);
+            }
 
-            int rowsAffected = await command.ExecuteNonQueryAsync(cancellationToken);
-            return rowsAffected > 0;
+            return result;
         }
 
-        public async Task<bool> AddAsync(Client client, CancellationToken cancellationToken)
+        // Delete client
+        public async Task<OperationResult<bool>> DeleteClient(Guid id, CancellationToken cancellationToken)
         {
-            using var connection = _connectionFactory.CreateConnection();
-            await connection.OpenAsync(cancellationToken);
+            // Fetch existing client first
+            var existingResult = await GetClientById(id, cancellationToken);
 
-            using var command = new SqlCommand(
-                "INSERT INTO Clients (Name, Direction, Email, Phone) VALUES (@Name, @Direction, @Email, @Phone)", 
-                connection);
+            if (existingResult.Result == null)
+            {
+                return new OperationResult<bool>().AddError(404, "Client not found");
+            }
 
-            command.Parameters.AddWithValue("@Name", client.Name);
-            command.Parameters.AddWithValue("@Direction", client.Direction);
-            command.Parameters.AddWithValue("@Email", client.Email);
-            command.Parameters.AddWithValue("@Phone", client.Phone);
+            var result = new OperationResult<bool>();
+            try
+            {
+                _context.Clients.Remove(existingResult.Result);
+                await _context.SaveChangesAsync(cancellationToken);
+                result.AddResult(true);
+            }
+            catch (Exception ex)
+            {
+                result.AddException(ex);
+            }
 
-            int rowsAffected = await command.ExecuteNonQueryAsync(cancellationToken);
-            return rowsAffected > 0;
-        }
-
-        public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken)
-        {
-            using var connection = _connectionFactory.CreateConnection();
-            await connection.OpenAsync(cancellationToken);
-
-            using var command = new SqlCommand("DELETE FROM Clients WHERE ClientId = @Id", connection);
-            command.Parameters.AddWithValue("@Id", id);
-
-            int rowsAffected = await command.ExecuteNonQueryAsync(cancellationToken);
-            return rowsAffected > 0;
+            return result;
         }
     }
 }

@@ -7,13 +7,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.20" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.20">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.20" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.20">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\InvoiceEF.Crud.CrossCutting\InvoiceEF.Crud.CrossCutting.csproj" />
     <ProjectReference Include="..\InvoiceEF.Crud.Domain.Contracts\InvoiceEF.Crud.Domain.Contracts.csproj" />
-    <ProjectReference Include="..\InvoiceEF.Crud.Domain.Services\InvoiceEF.Crud.Domain.Services.csproj" />
-    <ProjectReference Include="..\InvoiceEF.Crud.Domain\InvoiceEF.Crud.Domain.Entities.csproj" />
+    <ProjectReference Include="..\InvoiceEF.Crud.Domain.Entities\InvoiceEF.Crud.Domain.Entities.csproj" />
     <ProjectReference Include="..\InvoiceEF.Crud.Infrastructure.Data\InvoiceEF.Crud.Infrastructure.Data.csproj" />
-    <ProjectReference Include="..\InvoiceEF.Crud.Infrastructure.Proxies\InvoiceEF.Crud.Infrastructure.Proxies.csproj" />
-    <ProjectReference Include="..\InvoiceEF.Crud.Infrastructure.Repositories\InvoiceEF.Crud.Infrastructure.Repositories.csproj" />
   </ItemGroup>
 
 </Project>

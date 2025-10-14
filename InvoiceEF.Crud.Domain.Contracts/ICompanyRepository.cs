@@ -1,13 +1,14 @@
-﻿using InvoiceEF.Crud.Domain.Entities;
+﻿using InvoiceEF.Crud.CrossCutting;
+using InvoiceEF.Crud.Domain.Entities;
 
 namespace InvoiceEF.Crud.Domain.Contracts
 {
     public interface ICompanyRepository
     {
-        Task<IEnumerable<Company>> GetAllAsync(CancellationToken cancellationToken);
-        Task<Company?> GetByIdAsync(int id, CancellationToken cancellationToken);
-        Task<bool> AddAsync(Company company, CancellationToken cancellationToken);
-        Task<bool> UpdateAsync(Company company, CancellationToken cancellationToken);
-        Task<bool> DeleteAsync(int id, CancellationToken cancellationToken);
+        Task<OperationResult<IEnumerable<Company>>> GetCompanies(CancellationToken cancellationToken);
+        Task<OperationResult<Company?>> GetCompanyById(Guid id, CancellationToken cancellationToken);
+        Task<OperationResult<Company>> AddCompany(Company company, CancellationToken cancellationToken);
+        Task<OperationResult<Company>> UpdateCompany(Company company, CancellationToken cancellationToken);
+        Task<OperationResult<bool>> DeleteCompany(Guid id, CancellationToken cancellationToken);
     }
 }

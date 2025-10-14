@@ -1,13 +1,14 @@
-﻿using InvoiceEF.Crud.Domain.Entities;
+﻿using InvoiceEF.Crud.CrossCutting;
+using InvoiceEF.Crud.Domain.Entities;
 
 namespace InvoiceEF.Crud.Domain.Contracts
 {
     public interface IInvoiceLineRepository
     {
-        Task<IEnumerable<InvoiceLine>> GetAllAsync(CancellationToken cancellationToken);
-        Task<InvoiceLine?> GetByIdAsync(int id, CancellationToken cancellationToken);
-        Task<bool> AddAsync(InvoiceLine invoiceLine, CancellationToken cancellationToken);
-        Task<bool> UpdateAsync(InvoiceLine invoiceLine, CancellationToken cancellationToken);
-        Task<bool> DeleteAsync(int id, CancellationToken cancellationToken);
+        Task<OperationResult<IEnumerable<InvoiceLine>>> GetInvoiceLines(CancellationToken cancellationToken);
+        Task<OperationResult<InvoiceLine?>> GetInvoiceLineById(Guid id, CancellationToken cancellationToken);
+        Task<OperationResult<InvoiceLine>> AddInvoiceLine(InvoiceLine invoiceLine, CancellationToken cancellationToken);
+        Task<OperationResult<InvoiceLine>> UpdateInvoiceLine(InvoiceLine invoiceLine, CancellationToken cancellationToken);
+        Task<OperationResult<bool>> DeleteInvoiceLine(Guid id, CancellationToken cancellationToken);
     }
 }

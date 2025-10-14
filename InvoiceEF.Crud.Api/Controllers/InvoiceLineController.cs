@@ -11,60 +11,70 @@ namespace InvoiceEF.Crud.Api.Controllers
     {
         private readonly IInvoiceLineService _invoiceLineService = invoiceLineService;
 
-        // GET: api/<InvoiceLineController>
+        // GET: api/InvoiceLine
         [HttpGet]
-        public async Task<IEnumerable<InvoiceLine>> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
-            return await _invoiceLineService.GetAllAsync(cancellationToken);
+            var result = await _invoiceLineService.GetInvoiceLines(cancellationToken);
+
+            if (result.HasErrors)
+                return BadRequest(result.Errors);
+
+            return Ok(result.Result);
         }
 
-        // GET api/<InvoiceLineController>/5
+        // GET: api/InvoiceLine/{id}
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
         {
-            var invoiceLine = await _invoiceLineService.GetByIdAsync(id, cancellationToken);
-            if (invoiceLine == null)
-                return NotFound();
+            var result = await _invoiceLineService.GetInvoiceLineById(id, cancellationToken);
 
-            return Ok(invoiceLine);
+            if (result.HasErrors || result.Result == null)
+                return NotFound(result.Errors.Count > 0 ? result.Errors : null);
+
+            return Ok(result.Result);
         }
 
-        // POST api/<InvoiceLineController>
+        // POST: api/InvoiceLine
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] InvoiceLine invoiceLine, CancellationToken cancellationToken)
         {
-            bool result = await _invoiceLineService.AddAsync(invoiceLine, cancellationToken);
+            if (invoiceLine == null)
+                return BadRequest("InvoiceLine cannot be null.");
 
-            if (result)
-                return StatusCode(201); // 201 Created
+            var result = await _invoiceLineService.AddInvoiceLine(invoiceLine, cancellationToken);
 
-            return BadRequest("Failed to create invoice line.");
+            if (result.HasErrors || result.Result == null)
+                return BadRequest(result.Errors);
+
+            return CreatedAtAction(nameof(Get), new { id = result.Result.LineId }, result.Result);
         }
 
-        // PUT api/<InvoiceLineController>/5
+        // PUT: api/InvoiceLine/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] InvoiceLine invoiceLine, CancellationToken cancellationToken)
+        public async Task<IActionResult> Put(Guid id, [FromBody] InvoiceLine invoiceLine, CancellationToken cancellationToken)
         {
             if (id != invoiceLine.LineId)
-                return BadRequest("ID mismatch");
+                return BadRequest("ID mismatch.");
 
-            bool updated = await _invoiceLineService.UpdateAsync(invoiceLine, cancellationToken);
+            var result = await _invoiceLineService.UpdateInvoiceLine(invoiceLine, cancellationToken);
 
-            if (updated)
-                return Ok();
-            else
-                return NotFound();
+            if (result.HasErrors || result.Result == null)
+                return NotFound(result.Errors.Count > 0 ? result.Errors : null);
+
+            return Ok(result.Result);
         }
 
-        // DELETE api/<InvoiceLineController>/5
+        // DELETE: api/InvoiceLine/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
-            bool result = await _invoiceLineService.DeleteAsync(id, cancellationToken);
-            if (result)
-                return Ok();
-            else
-                return NotFound();
+            var result = await _invoiceLineService.DeleteInvoiceLine(id, cancellationToken);
+
+            if (result.HasErrors || !result.Result)
+                return NotFound(result.Errors.Count > 0 ? result.Errors : null);
+
+            return Ok();
         }
     }
 }

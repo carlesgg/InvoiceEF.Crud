@@ -11,60 +11,70 @@ namespace InvoiceEF.Crud.Api.Controllers
     {
         private readonly ICompanyService _companyService = companyService;
 
-        // GET: api/<CompanyController>
+        // GET: api/Company
         [HttpGet]
-        public async Task<IEnumerable<Company>> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
-            return await _companyService.GetAllAsync(cancellationToken);
+            var result = await _companyService.GetCompanies(cancellationToken);
+
+            if (result.HasErrors)
+                return BadRequest(result.Errors);
+
+            return Ok(result.Result);
         }
 
-        // GET api/<CompanyController>/5
+        // GET: api/Company/{id}
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
         {
-            var company = await _companyService.GetByIdAsync(id, cancellationToken);
-            if (company == null)
-                return NotFound();
+            var result = await _companyService.GetCompanyById(id, cancellationToken);
 
-            return Ok(company);
+            if (result.HasErrors || result.Result == null)
+                return NotFound(result.Errors.Count > 0 ? result.Errors : null);
+
+            return Ok(result.Result);
         }
 
-        // POST api/<CompanyController>
+        // POST: api/Company
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Company company, CancellationToken cancellationToken)
         {
-            bool result = await _companyService.AddAsync(company, cancellationToken);
+            if (company == null)
+                return BadRequest("Company cannot be null.");
 
-            if (result)
-                return StatusCode(201); // 201 Created
+            var result = await _companyService.AddCompany(company, cancellationToken);
 
-            return BadRequest("Failed to create company.");
+            if (result.HasErrors || result.Result == null)
+                return BadRequest(result.Errors);
+
+            return CreatedAtAction(nameof(Get), new { id = result.Result.CompanyId }, result.Result);
         }
 
-        // PUT api/<CompanyController>/5
+        // PUT: api/Company/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Company company, CancellationToken cancellationToken)
+        public async Task<IActionResult> Put(Guid id, [FromBody] Company company, CancellationToken cancellationToken)
         {
             if (id != company.CompanyId)
-                return BadRequest("ID mismatch");
+                return BadRequest("ID mismatch.");
 
-            bool updated = await _companyService.UpdateAsync(company, cancellationToken);
+            var result = await _companyService.UpdateCompany(company, cancellationToken);
 
-            if (updated)
-                return Ok();
-            else
-                return NotFound();
+            if (result.HasErrors || result.Result == null)
+                return NotFound(result.Errors.Count > 0 ? result.Errors : null);
+
+            return Ok(result.Result);
         }
 
-        // DELETE api/<CompanyController>/5
+        // DELETE: api/Company/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
-            bool result = await _companyService.DeleteAsync(id, cancellationToken);
-            if (result)
-                return Ok();
-            else
-                return NotFound();
+            var result = await _companyService.DeleteCompany(id, cancellationToken);
+
+            if (result.HasErrors || !result.Result)
+                return NotFound(result.Errors.Count > 0 ? result.Errors : null);
+
+            return Ok();
         }
     }
 }

@@ -6,7 +6,7 @@ namespace InvoiceEF.Crud.CrossCutting
     {
         public static IActionResult ToAction<T>(this OperationResult<T> result,
                                                 HttpVerb httpVerb) =>
-            result.IsSuccess
+            result.HasErrors
             ? result.ToObjectResultByVerb(httpVerb)
             : new ObjectResult(
                     new ProblemDetails()

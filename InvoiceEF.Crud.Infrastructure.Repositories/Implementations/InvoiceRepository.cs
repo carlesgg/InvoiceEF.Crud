@@ -1,128 +1,122 @@
-﻿using Microsoft.Data.SqlClient;
-using InvoiceEF.Crud.Domain.Entities;
+﻿using InvoiceEF.Crud.CrossCutting;
 using InvoiceEF.Crud.Domain.Contracts;
-using InvoiceEF.Crud.Infrastructure.Data.Contracts;
+using InvoiceEF.Crud.Domain.Entities;
+using InvoiceEF.Crud.Infrastructure.Context.Implementations;
+using Microsoft.EntityFrameworkCore;
+using System.ClientModel.Primitives;
 
 namespace InvoiceEF.Crud.Infrastructure.Repositories.Implementations
 {
-    public class InvoiceRepository(ISqlConnectionFactory connectionFactory) : IInvoiceRepository
+    public class InvoiceRepository(AppDbContext context) : IInvoiceRepository
     {
-        private readonly ISqlConnectionFactory _connectionFactory = connectionFactory;
+        private readonly AppDbContext _context = context;
 
-        public async Task<IEnumerable<Invoice>> GetAllAsync(CancellationToken cancellationToken)
+        public async Task<OperationResult<IEnumerable<Invoice>>> GetInvoices(CancellationToken cancellationToken)
         {
-            List<Invoice> invoices = [];
-            using var connection = _connectionFactory.CreateConnection();
-            await connection.OpenAsync(cancellationToken);
- 
-            using SqlCommand command = new(
-                "SELECT InvoiceId, ClientId, CompanyId, InvoiceDate, Estimate, Signature FROM Invoices", 
-                connection);
-            using var reader = await command.ExecuteReaderAsync(cancellationToken);
-
-            while (await reader.ReadAsync(cancellationToken))
+            var result = new OperationResult<IEnumerable<Invoice>>();
+            try
             {
-                var invoice = new Invoice
-                {
-                    InvoiceId = reader.GetInt32(0),
-                    ClientId = reader.GetInt32(1),
-                    CompanyId = reader.GetInt32(2),
-                    InvoiceDate = reader.GetDateTime(3),
-                    Estimate = reader.GetDecimal(4),
-                    Signature = reader.GetString(5)
-                };
-                invoices.Add(invoice);
+                var invoices = await _context.Invoices.ToListAsync(cancellationToken);
+                result.AddResult(invoices);
             }
-            
-            return await Task.FromResult(invoices.AsEnumerable());
-        }
-
-        public async Task<Invoice?> GetByIdAsync(int id, CancellationToken cancellationToken)
-        {
-            Invoice? invoice = null;
-
-            using var connection = _connectionFactory.CreateConnection();
-            await connection.OpenAsync(cancellationToken);
-
-            using var command = new SqlCommand(
-                "SELECT InvoiceId, ClientId, CompanyId, InvoiceDate, Estimate, Signature FROM Invoices WHERE InvoiceId = @Id", 
-                connection);
-            command.Parameters.AddWithValue("@Id", id);
-
-            using var reader = await command.ExecuteReaderAsync(cancellationToken);
-            if (await reader.ReadAsync(cancellationToken))
+            catch (Exception ex)
             {
-                invoice = new()
-                {
-                    InvoiceId = reader.GetInt32(0),
-                    ClientId = reader.GetInt32(1),
-                    CompanyId = reader.GetInt32(2),
-                    InvoiceDate = reader.GetDateTime(3),
-                    Estimate = reader.GetDecimal(4),
-                    Signature = reader.GetString(5)
-                };
+                result.AddException(ex);
             }
-            return await Task.FromResult(invoice);
+            return result;
         }
 
-        public async Task<bool> UpdateAsync(Invoice invoice, CancellationToken cancellationToken)
+        // Obtener una factura por ID
+        public async Task<OperationResult<Invoice?>> GetInvoiceById(Guid id, CancellationToken cancellationToken)
         {
-            using var connection = _connectionFactory.CreateConnection();
-            await connection.OpenAsync(cancellationToken);
+            var result = new OperationResult<Invoice?>();
+            try
+            {
+                var invoice = await _context.Invoices.FindAsync([id], cancellationToken);
+                if (invoice == null)
+                {
+                    result.AddError(404, "Invoice not found");
+                    return result;
+                }
 
-            using var command = new SqlCommand(
-                @"UPDATE Invoices 
-                SET ClientId = @ClientId, 
-                    CompanyId = @CompanyId, 
-                    InvoiceDate = @InvoiceDate, 
-                    Estimate = @Estimate, 
-                    Signature = @Signature 
-                WHERE InvoiceId = @Id", 
-                connection);
-
-            command.Parameters.AddWithValue("@Id", invoice.InvoiceId);
-            command.Parameters.AddWithValue("@ClientId", invoice.ClientId);
-            command.Parameters.AddWithValue("@CompanyId", invoice.CompanyId);
-            command.Parameters.AddWithValue("@InvoiceDate", invoice.InvoiceDate);
-            command.Parameters.AddWithValue("@Estimate", invoice.Estimate);
-            command.Parameters.AddWithValue("@Signature", invoice.Signature);
-
-            int rowsAffected = await command.ExecuteNonQueryAsync(cancellationToken);
-            return rowsAffected > 0;
+                result.AddResult(invoice);
+            }
+            catch (Exception ex)
+            {
+                result.AddException(ex);
+            }
+            return result;
         }
 
-        public async Task<bool> AddAsync(Invoice invoice, CancellationToken cancellationToken)
+        // Agregar una nueva factura
+        public async Task<OperationResult<Invoice>> AddInvoice(Invoice invoice, CancellationToken cancellationToken)
         {
-            using var connection = _connectionFactory.CreateConnection();
-            await connection.OpenAsync(cancellationToken);
-
-            using var command = new SqlCommand(
-                @"INSERT INTO Invoices 
-                (ClientId, CompanyId, InvoiceDate, Estimate, Signature) 
-                VALUES 
-                (@ClientId, @CompanyId, @InvoiceDate, @Estimate, @Signature)", 
-                connection);
-
-            command.Parameters.AddWithValue("@ClientId", invoice.ClientId);
-            command.Parameters.AddWithValue("@CompanyId", invoice.CompanyId);
-            command.Parameters.AddWithValue("@InvoiceDate", invoice.InvoiceDate);
-            command.Parameters.AddWithValue("@Estimate", invoice.Estimate);
-            command.Parameters.AddWithValue("@Signature", invoice.Signature);
-
-            int rowsAffected = await command.ExecuteNonQueryAsync(cancellationToken);
-            return rowsAffected > 0;
+            var result = new OperationResult<Invoice>();
+            try
+            {
+                await _context.Invoices.AddAsync(invoice, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+                result.AddResult(invoice);
+            }
+            catch (Exception ex)
+            {
+                result.AddException(ex);
+            }
+            return result;
         }
 
-        public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken)
+        // Actualizar una factura existente
+        public async Task<OperationResult<Invoice>> UpdateInvoice(Invoice invoice, CancellationToken cancellationToken)
         {
-            using var connection = _connectionFactory.CreateConnection();
-            await connection.OpenAsync(cancellationToken);
+            var result = new OperationResult<Invoice>();
+            try
+            {
+                var existing = await _context.Invoices.FindAsync([invoice.InvoiceId], cancellationToken);
+                if (existing == null)
+                {
+                    result.AddError(404, "Invoice not found");
+                    return result;
+                }
 
-            using var command = new SqlCommand("DELETE FROM Invoices WHERE InvoiceId = @Id", connection);
-            command.Parameters.AddWithValue("@Id", id);
+                existing.ClientId = invoice.ClientId;
+                existing.CompanyId = invoice.CompanyId;
+                existing.InvoiceDate = invoice.InvoiceDate;
+                existing.Estimate = invoice.Estimate;
+                existing.Signature = invoice.Signature;
 
-            int rowsAffected = await command.ExecuteNonQueryAsync(cancellationToken);
-            return rowsAffected > 0;
+                await _context.SaveChangesAsync(cancellationToken);
+                result.AddResult(existing);
+            }
+            catch (Exception ex)
+            {
+                result.AddException(ex);
+            }
+            return result;
+        }
+
+        // Eliminar una factura
+        public async Task<OperationResult<bool>> DeleteInvoice(Guid id, CancellationToken cancellationToken)
+        {
+            var result = new OperationResult<bool>();
+            try
+            {
+                var existing = await _context.Invoices.FindAsync([id], cancellationToken);
+                if (existing == null)
+                {
+                    result.AddError(404, "Invoice not found");
+                    result.AddResult(false);
+                    return result;
+                }
+
+                _context.Invoices.Remove(existing);
+                await _context.SaveChangesAsync(cancellationToken);
+                result.AddResult(true);
+            }
+            catch (Exception ex)
+            {
+                result.AddException(ex);
+            }
+            return result;
         }
     }
 }

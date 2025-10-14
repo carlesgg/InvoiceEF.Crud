@@ -1,7 +1,8 @@
-﻿using System.Threading;
-using InvoiceEF.Crud.Application.Services.Contracts;
-using InvoiceEF.Crud.Domain.Entities;
+﻿using InvoiceEF.Crud.Application.Services.Contracts;
+using InvoiceEF.Crud.CrossCutting;
 using InvoiceEF.Crud.Domain.Contracts;
+using InvoiceEF.Crud.Domain.Entities;
+using System.Threading;
 
 namespace InvoiceEF.Crud.Application.Services.Implementations
 {
@@ -9,29 +10,29 @@ namespace InvoiceEF.Crud.Application.Services.Implementations
     {
         private readonly ICompanyRepository _companyRepository = companyRepository;
 
-        public async Task<IEnumerable<Company>> GetAllAsync(CancellationToken cancellationToken)
+        public async Task<OperationResult<IEnumerable<Company>>> GetCompanies(CancellationToken cancellationToken)
         {
-            return await _companyRepository.GetAllAsync(cancellationToken);
+            return await _companyRepository.GetCompanies(cancellationToken);
         }
 
-        public async Task<Company?> GetByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task<OperationResult<Company?>> GetCompanyById(Guid id, CancellationToken cancellationToken)
         {
-            return await _companyRepository.GetByIdAsync(id, cancellationToken);
+            return await _companyRepository.GetCompanyById(id, cancellationToken);
         }
 
-        public async Task<bool> UpdateAsync(Company company, CancellationToken cancellationToken)
+        public async Task<OperationResult<Company>> AddCompany(Company company, CancellationToken cancellationToken)
         {
-            return await _companyRepository.UpdateAsync(company, cancellationToken);
+            return await _companyRepository.AddCompany(company, cancellationToken);
         }
 
-        public async Task<bool> AddAsync(Company company, CancellationToken cancellationToken)
+        public async Task<OperationResult<Company>> UpdateCompany(Company company, CancellationToken cancellationToken)
         {
-            return await _companyRepository.AddAsync(company, cancellationToken);
+            return await _companyRepository.UpdateCompany(company, cancellationToken);
         }
 
-        public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken)
+        public async Task<OperationResult<bool>> DeleteCompany(Guid id, CancellationToken cancellationToken)
         {
-            return await _companyRepository.DeleteAsync(id, cancellationToken);
+            return await _companyRepository.DeleteCompany(id, cancellationToken);
         }
     }
 }

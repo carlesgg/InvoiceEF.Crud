@@ -1,7 +1,8 @@
-﻿using System.Threading;
-using InvoiceEF.Crud.Application.Services.Contracts;
-using InvoiceEF.Crud.Domain.Entities;
+﻿using InvoiceEF.Crud.Application.Services.Contracts;
+using InvoiceEF.Crud.CrossCutting;
 using InvoiceEF.Crud.Domain.Contracts;
+using InvoiceEF.Crud.Domain.Entities;
+using System.Threading;
 
 namespace InvoiceEF.Crud.Application.Services.Implementations
 {
@@ -9,29 +10,29 @@ namespace InvoiceEF.Crud.Application.Services.Implementations
     {
         private readonly IInvoiceRepository _invoiceRepository = invoiceRepository;
 
-        public async Task<IEnumerable<Invoice>> GetAllAsync(CancellationToken cancellationToken)
+        public async Task<OperationResult<IEnumerable<Invoice>>> GetInvoices(CancellationToken cancellationToken)
         {
-            return await _invoiceRepository.GetAllAsync(cancellationToken);
+            return await _invoiceRepository.GetInvoices(cancellationToken);
         }
 
-        public async Task<Invoice?> GetByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task<OperationResult<Invoice?>> GetInvoiceById(Guid id, CancellationToken cancellationToken)
         {
-            return await _invoiceRepository.GetByIdAsync(id, cancellationToken);
+            return await _invoiceRepository.GetInvoiceById(id, cancellationToken);
         }
 
-        public async Task<bool> UpdateAsync(Invoice invoice, CancellationToken cancellationToken)
+        public async Task<OperationResult<Invoice>> AddInvoice(Invoice invoice, CancellationToken cancellationToken)
         {
-            return await _invoiceRepository.UpdateAsync(invoice, cancellationToken);
+            return await _invoiceRepository.AddInvoice(invoice, cancellationToken);
         }
 
-        public async Task<bool> AddAsync(Invoice invoice, CancellationToken cancellationToken)
+        public async Task<OperationResult<Invoice>> UpdateInvoice(Invoice invoice, CancellationToken cancellationToken)
         {
-            return await _invoiceRepository.AddAsync(invoice, cancellationToken);
+            return await _invoiceRepository.UpdateInvoice(invoice, cancellationToken);
         }
 
-        public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken)
+        public async Task<OperationResult<bool>> DeleteInvoice(Guid id, CancellationToken cancellationToken)
         {
-            return await _invoiceRepository.DeleteAsync(id, cancellationToken);
+            return await _invoiceRepository.DeleteInvoice(id, cancellationToken);
         }
     }
 }

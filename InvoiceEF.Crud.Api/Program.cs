@@ -3,6 +3,7 @@ using InvoiceEF.Crud.Infrastructure.Repositories.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var connectionString = builder.Configuration.GetConnectionString("InvoiceEFDb");
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -11,7 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddApplicationLayer();
-builder.Services.AddInfrastructureLayer();
+builder.Services.AddInfrastructureLayer(connectionString);
 
 var app = builder.Build();
 

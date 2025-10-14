@@ -11,63 +11,70 @@ namespace InvoiceEF.Crud.Api.Controllers
     {
         private readonly IClientService _clientService = clientService;
 
-        // GET: api/<ClientController> (GET ALL)
+        // GET: api/Client
         [HttpGet]
-        public async Task<IEnumerable<Client>> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
-            return await _clientService.GetAllAsync(cancellationToken);
+            var result = await _clientService.GetClients(cancellationToken);
+
+            if (result.HasErrors)
+                return BadRequest(result.Errors);
+
+            return Ok(result.Result);
         }
 
-        // GET api/<ClientController>/5 (GET BY ID)
+        // GET: api/Client/{id}
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
         {
-            var client = await _clientService.GetByIdAsync(id, cancellationToken);
-            if (client == null)
-                return NotFound();
+            var result = await _clientService.GetClientById(id, cancellationToken);
 
-            return Ok(client);
+            if (result.HasErrors || result.Result == null)
+                return NotFound(result.Errors.Count > 0 ? result.Errors : null);
+
+            return Ok(result.Result);
         }
 
-
-        // POST api/<ClientController> (CREATE)
+        // POST: api/Client
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Client client, CancellationToken cancellationToken)
         {
-            bool result = await _clientService.AddAsync(client, cancellationToken);
+            if (client == null)
+                return BadRequest("Client cannot be null.");
 
-            if (result)
-                return StatusCode(201); // 201 Created
+            var result = await _clientService.AddClient(client, cancellationToken);
 
-            return BadRequest("Failed to create client.");
+            if (result.HasErrors || result.Result == null)
+                return BadRequest(result.Errors);
+
+            return CreatedAtAction(nameof(Get), new { id = result.Result.ClientId }, result.Result);
         }
 
-
-        // PUT api/<ClientController>/5 (UPDATE)
+        // PUT: api/Client/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Client client, CancellationToken cancellationToken)
+        public async Task<IActionResult> Put(Guid id, [FromBody] Client client, CancellationToken cancellationToken)
         {
             if (id != client.ClientId)
-                return BadRequest("ID mismatch");
+                return BadRequest("ID mismatch.");
 
-            bool updated = await _clientService.UpdateAsync(client, cancellationToken);
+            var result = await _clientService.UpdateClient(client, cancellationToken);
 
-            if (updated)
-                return Ok();
-            else
-                return NotFound();
+            if (result.HasErrors || result.Result == null)
+                return NotFound(result.Errors.Count > 0 ? result.Errors : null);
+
+            return Ok(result.Result);
         }
 
-
-        // DELETE api/<ClientController>/5 (DELETE)
+        // DELETE: api/Client/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
-            bool result = await _clientService.DeleteAsync(id, cancellationToken);
-            if (result)
-                return Ok();  // 200 OK If successfully deleted
-            else
-                return NotFound();  // 404 If the client was not found
+            var result = await _clientService.DeleteClient(id, cancellationToken);
+
+            if (result.HasErrors || !result.Result)
+                return NotFound(result.Errors.Count > 0 ? result.Errors : null);
+
+            return Ok();
         }
 
     }
