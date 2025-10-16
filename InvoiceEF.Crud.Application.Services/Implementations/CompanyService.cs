@@ -10,22 +10,22 @@ namespace InvoiceEF.Crud.Application.Services.Implementations
     {
         private readonly ICompanyRepository _companyRepository = companyRepository;
 
-        public async Task<OperationResult<IEnumerable<Company>>> GetCompanies(CancellationToken cancellationToken)
+        public async Task<OperationResult<IEnumerable<CompanyEntity>>> GetCompanies(CancellationToken cancellationToken)
         {
             return await _companyRepository.GetCompanies(cancellationToken);
         }
 
-        public async Task<OperationResult<Company?>> GetCompanyById(Guid id, CancellationToken cancellationToken)
+        public async Task<OperationResult<CompanyEntity?>> GetCompanyById(Guid id, CancellationToken cancellationToken)
         {
             return await _companyRepository.GetCompanyById(id, cancellationToken);
         }
 
-        public async Task<OperationResult<Company>> AddCompany(Company company, CancellationToken cancellationToken)
+        public async Task<OperationResult<CompanyEntity>> AddCompany(CompanyEntity company, CancellationToken cancellationToken)
         {
             return await _companyRepository.AddCompany(company, cancellationToken);
         }
 
-        public async Task<OperationResult<Company>> UpdateCompany(Company company, CancellationToken cancellationToken)
+        public async Task<OperationResult<CompanyEntity>> UpdateCompany(CompanyEntity company, CancellationToken cancellationToken)
         {
             return await _companyRepository.UpdateCompany(company, cancellationToken);
         }

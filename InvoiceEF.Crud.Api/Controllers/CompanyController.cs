@@ -37,7 +37,7 @@ namespace InvoiceEF.Crud.Api.Controllers
 
         // POST: api/Company
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] Company company, CancellationToken cancellationToken)
+        public async Task<IActionResult> Post([FromBody] CompanyEntity company, CancellationToken cancellationToken)
         {
             if (company == null)
                 return BadRequest("Company cannot be null.");
@@ -52,7 +52,7 @@ namespace InvoiceEF.Crud.Api.Controllers
 
         // PUT: api/Company/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(Guid id, [FromBody] Company company, CancellationToken cancellationToken)
+        public async Task<IActionResult> Put(Guid id, [FromBody] CompanyEntity company, CancellationToken cancellationToken)
         {
             if (id != company.CompanyId)
                 return BadRequest("ID mismatch.");

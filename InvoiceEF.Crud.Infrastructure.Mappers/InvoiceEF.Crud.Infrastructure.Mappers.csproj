@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\InvoiceEF.Crud.Domain.Entities\InvoiceEF.Crud.Domain.Entities.csproj" />
+    <ProjectReference Include="..\InvoiceEF.Crud.Infrastructure.Data\InvoiceEF.Crud.Infrastructure.Data.csproj" />
+  </ItemGroup>
+
+</Project>

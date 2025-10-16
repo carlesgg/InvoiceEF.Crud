@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using InvoiceEF.Crud.Domain.Entities;
-using InvoiceEF.Crud.Infrastructure.Repositories.Data;
+using InvoiceEF.Crud.Infrastructure.Data;
 
 namespace InvoiceEF.Crud.Infrastructure.Context.Implementations
 {

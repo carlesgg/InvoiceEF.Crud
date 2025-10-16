@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\InvoiceEF.Crud.Infrastructure.Context\InvoiceEF.Crud.Infrastructure.Context.csproj" />
+    <ProjectReference Include="..\InvoiceEF.Crud.Infrastructure.Mappers\InvoiceEF.Crud.Infrastructure.Mappers.csproj" />
   </ItemGroup>
 
 </Project>

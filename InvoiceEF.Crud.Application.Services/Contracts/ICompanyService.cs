@@ -5,10 +5,10 @@ namespace InvoiceEF.Crud.Application.Services.Contracts
 {
     public interface ICompanyService
     {
-        Task<OperationResult<IEnumerable<Company>>> GetCompanies(CancellationToken cancellationToken);
-        Task<OperationResult<Company?>> GetCompanyById(Guid id, CancellationToken cancellationToken);
-        Task<OperationResult<Company>> AddCompany(Company company, CancellationToken cancellationToken);
-        Task<OperationResult<Company>> UpdateCompany(Company company, CancellationToken cancellationToken);
+        Task<OperationResult<IEnumerable<CompanyEntity>>> GetCompanies(CancellationToken cancellationToken);
+        Task<OperationResult<CompanyEntity?>> GetCompanyById(Guid id, CancellationToken cancellationToken);
+        Task<OperationResult<CompanyEntity>> AddCompany(CompanyEntity company, CancellationToken cancellationToken);
+        Task<OperationResult<CompanyEntity>> UpdateCompany(CompanyEntity company, CancellationToken cancellationToken);
         Task<OperationResult<bool>> DeleteCompany(Guid id, CancellationToken cancellationToken);
     }
 }

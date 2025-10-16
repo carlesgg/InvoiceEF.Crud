@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\InvoiceEF.Crud.Infrastructure.Data\InvoiceEF.Crud.Infrastructure.Data.csproj" />
+  </ItemGroup>
+
 </Project>

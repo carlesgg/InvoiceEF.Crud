@@ -1,122 +1,42 @@
 ﻿using InvoiceEF.Crud.CrossCutting;
 using InvoiceEF.Crud.Domain.Contracts;
 using InvoiceEF.Crud.Domain.Entities;
+using InvoiceEF.Crud.Infrastructure.Base.Implementations;
 using InvoiceEF.Crud.Infrastructure.Context.Implementations;
-using Microsoft.EntityFrameworkCore;
-using System.ClientModel.Primitives;
+using InvoiceEF.Crud.Infrastructure.Data;
+using InvoiceEF.Crud.Infrastructure.Mappers;
 
 namespace InvoiceEF.Crud.Infrastructure.Repositories.Implementations
 {
-    public class InvoiceRepository(AppDbContext context) : IInvoiceRepository
+    public class InvoiceRepository(AppDbContext context, IMapper<InvoiceEntity, Invoice> mapper) : BaseRepository<InvoiceEntity, Invoice>(context, mapper), IInvoiceRepository
     {
-        private readonly AppDbContext _context = context;
+        public Task<OperationResult<IEnumerable<InvoiceEntity>>> GetInvoices(CancellationToken cancellationToken)
+            => GetAllAsync(cancellationToken);
 
-        public async Task<OperationResult<IEnumerable<Invoice>>> GetInvoices(CancellationToken cancellationToken)
+        public Task<OperationResult<InvoiceEntity?>> GetInvoiceById(Guid id, CancellationToken cancellationToken)
+            => GetByIdAsync(id, cancellationToken);
+
+        public Task<OperationResult<InvoiceEntity>> AddInvoice(InvoiceEntity invoice, CancellationToken cancellationToken)
+            => AddAsync(invoice, cancellationToken);
+
+        public Task<OperationResult<InvoiceEntity>> UpdateInvoice(InvoiceEntity invoice, CancellationToken cancellationToken)
+            => UpdateAsync(invoice, cancellationToken);
+
+        public Task<OperationResult<bool>> DeleteInvoice(Guid id, CancellationToken cancellationToken)
+            => DeleteAsync(id, cancellationToken);
+
+        protected override void UpdateEntity(Invoice model, InvoiceEntity domainEntity)
         {
-            var result = new OperationResult<IEnumerable<Invoice>>();
-            try
-            {
-                var invoices = await _context.Invoices.ToListAsync(cancellationToken);
-                result.AddResult(invoices);
-            }
-            catch (Exception ex)
-            {
-                result.AddException(ex);
-            }
-            return result;
+            model.ClientId = domainEntity.ClientId;
+            model.CompanyId = domainEntity.CompanyId;
+            model.InvoiceDate = domainEntity.InvoiceDate;
+            model.Estimate = domainEntity.Estimate;
+            model.Signature = domainEntity.Signature;
         }
 
-        // Obtener una factura por ID
-        public async Task<OperationResult<Invoice?>> GetInvoiceById(Guid id, CancellationToken cancellationToken)
+        protected override Guid GetId(InvoiceEntity domainEntity)
         {
-            var result = new OperationResult<Invoice?>();
-            try
-            {
-                var invoice = await _context.Invoices.FindAsync([id], cancellationToken);
-                if (invoice == null)
-                {
-                    result.AddError(404, "Invoice not found");
-                    return result;
-                }
-
-                result.AddResult(invoice);
-            }
-            catch (Exception ex)
-            {
-                result.AddException(ex);
-            }
-            return result;
-        }
-
-        // Agregar una nueva factura
-        public async Task<OperationResult<Invoice>> AddInvoice(Invoice invoice, CancellationToken cancellationToken)
-        {
-            var result = new OperationResult<Invoice>();
-            try
-            {
-                await _context.Invoices.AddAsync(invoice, cancellationToken);
-                await _context.SaveChangesAsync(cancellationToken);
-                result.AddResult(invoice);
-            }
-            catch (Exception ex)
-            {
-                result.AddException(ex);
-            }
-            return result;
-        }
-
-        // Actualizar una factura existente
-        public async Task<OperationResult<Invoice>> UpdateInvoice(Invoice invoice, CancellationToken cancellationToken)
-        {
-            var result = new OperationResult<Invoice>();
-            try
-            {
-                var existing = await _context.Invoices.FindAsync([invoice.InvoiceId], cancellationToken);
-                if (existing == null)
-                {
-                    result.AddError(404, "Invoice not found");
-                    return result;
-                }
-
-                existing.ClientId = invoice.ClientId;
-                existing.CompanyId = invoice.CompanyId;
-                existing.InvoiceDate = invoice.InvoiceDate;
-                existing.Estimate = invoice.Estimate;
-                existing.Signature = invoice.Signature;
-
-                await _context.SaveChangesAsync(cancellationToken);
-                result.AddResult(existing);
-            }
-            catch (Exception ex)
-            {
-                result.AddException(ex);
-            }
-            return result;
-        }
-
-        // Eliminar una factura
-        public async Task<OperationResult<bool>> DeleteInvoice(Guid id, CancellationToken cancellationToken)
-        {
-            var result = new OperationResult<bool>();
-            try
-            {
-                var existing = await _context.Invoices.FindAsync([id], cancellationToken);
-                if (existing == null)
-                {
-                    result.AddError(404, "Invoice not found");
-                    result.AddResult(false);
-                    return result;
-                }
-
-                _context.Invoices.Remove(existing);
-                await _context.SaveChangesAsync(cancellationToken);
-                result.AddResult(true);
-            }
-            catch (Exception ex)
-            {
-                result.AddException(ex);
-            }
-            return result;
+            return domainEntity.InvoiceId;
         }
     }
 }

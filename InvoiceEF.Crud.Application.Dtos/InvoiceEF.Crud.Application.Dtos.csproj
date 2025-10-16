@@ -17,15 +17,4 @@
     <ProjectReference Include="..\InvoiceEF.Crud.Infrastructure.Repositories\InvoiceEF.Crud.Infrastructure.Repositories.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Requests\Client\" />
-    <Folder Include="Requests\Company\" />
-    <Folder Include="Requests\Invoice\" />
-    <Folder Include="Requests\InvoiceLine\" />
-    <Folder Include="Responses\Client\" />
-    <Folder Include="Responses\Company\" />
-    <Folder Include="Responses\Invoice\" />
-    <Folder Include="Responses\InvoiceLine\" />
-  </ItemGroup>
-
 </Project>

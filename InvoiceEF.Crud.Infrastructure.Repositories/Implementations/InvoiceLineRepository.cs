@@ -1,113 +1,46 @@
 ﻿using InvoiceEF.Crud.CrossCutting;
 using InvoiceEF.Crud.Domain.Contracts;
 using InvoiceEF.Crud.Domain.Entities;
+using InvoiceEF.Crud.Infrastructure.Base.Implementations;
 using InvoiceEF.Crud.Infrastructure.Context.Implementations;
+using InvoiceEF.Crud.Infrastructure.Data;
+using InvoiceEF.Crud.Infrastructure.Mappers;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace InvoiceEF.Crud.Infrastructure.Repositories.Implementations
 {
-    public class InvoiceLineRepository(AppDbContext context) : IInvoiceLineRepository
+    public class InvoiceLineRepository(AppDbContext context, IMapper<InvoiceLineEntity, InvoiceLine> mapper) : BaseRepository<InvoiceLineEntity, InvoiceLine>(context, mapper), IInvoiceLineRepository
     {
-        private readonly AppDbContext _context = context;
 
-        public async Task<OperationResult<IEnumerable<InvoiceLine>>> GetInvoiceLines(CancellationToken cancellationToken)
+        public Task<OperationResult<IEnumerable<InvoiceLineEntity>>> GetInvoiceLines(CancellationToken cancellationToken)
+            => GetAllAsync(cancellationToken);
+
+        public Task<OperationResult<InvoiceLineEntity?>> GetInvoiceLineById(Guid id, CancellationToken cancellationToken)
+            => GetByIdAsync(id, cancellationToken);
+
+        public Task<OperationResult<InvoiceLineEntity>> AddInvoiceLine(InvoiceLineEntity invoiceLine, CancellationToken cancellationToken)
+            => AddAsync(invoiceLine, cancellationToken);
+
+
+        public Task<OperationResult<InvoiceLineEntity>> UpdateInvoiceLine(InvoiceLineEntity invoiceLine, CancellationToken cancellationToken)
+            => UpdateAsync(invoiceLine, cancellationToken);
+
+        public Task<OperationResult<bool>> DeleteInvoiceLine(Guid id, CancellationToken cancellationToken)
+            => DeleteAsync(id, cancellationToken);
+
+        protected override void UpdateEntity(InvoiceLine model, InvoiceLineEntity domainEntity)
         {
-            var result = new OperationResult<IEnumerable<InvoiceLine>>();
-            try
-            {
-                var invoiceLines = await _context.InvoiceLines.ToListAsync(cancellationToken);
-                result.AddResult(invoiceLines);
-            }
-            catch (Exception ex)
-            {
-                result.AddException(ex);
-            }
-            return result;
+            model.InvoiceId = domainEntity.InvoiceId;
+            model.Concept = domainEntity.Concept;
+            model.Quantity = domainEntity.Quantity;
+            model.Price = domainEntity.Price;
+            // model.LineTotal is computed, no need to update
         }
 
-        public async Task<OperationResult<InvoiceLine?>> GetInvoiceLineById(Guid id, CancellationToken cancellationToken)
+        protected override Guid GetId(InvoiceLineEntity domainEntity)
         {
-            var result = new OperationResult<InvoiceLine?>();
-            try
-            {
-                var invoiceLine = await _context.InvoiceLines.FindAsync([id], cancellationToken);
-                result.AddResult(invoiceLine);
-            }
-            catch (Exception ex)
-            {
-                result.AddException(ex);
-            }
-            return result;
-        }
-
-        public async Task<OperationResult<InvoiceLine>> AddInvoiceLine(InvoiceLine invoiceLine, CancellationToken cancellationToken)
-        {
-            var result = new OperationResult<InvoiceLine>();
-            try
-            {
-                await _context.InvoiceLines.AddAsync(invoiceLine, cancellationToken);
-                await _context.SaveChangesAsync(cancellationToken);
-                result.AddResult(invoiceLine);
-            }
-            catch (Exception ex)
-            {
-                result.AddException(ex);
-            }
-            return result;
-        }
-
-        
-        public async Task<OperationResult<InvoiceLine>> UpdateInvoiceLine(InvoiceLine invoiceLine, CancellationToken cancellationToken)
-        {
-            var result = new OperationResult<InvoiceLine>();
-            try
-            {
-                var existing = await _context.InvoiceLines.FindAsync([invoiceLine.LineId], cancellationToken);
-                if (existing == null)
-                {
-                    result.AddError(404, "InvoiceLine not found");
-                    return result;
-                }
-
-                existing.InvoiceId = invoiceLine.InvoiceId;
-                existing.Concept = invoiceLine.Concept;
-                existing.Quantity = invoiceLine.Quantity;
-                existing.Price = invoiceLine.Price;
-                existing.LineTotal = invoiceLine.LineTotal;
-
-                await _context.SaveChangesAsync(cancellationToken);
-                result.AddResult(existing);
-            }
-            catch (Exception ex)
-            {
-                result.AddException(ex);
-            }
-            return result;
-        }
-
-        public async Task<OperationResult<bool>> DeleteInvoiceLine(Guid id, CancellationToken cancellationToken)
-        {
-            var result = new OperationResult<bool>();
-            try
-            {
-                var existing = await _context.InvoiceLines.FindAsync([id], cancellationToken);
-                if (existing == null)
-                {
-                    result.AddError(404, "InvoiceLine not found");
-                    result.AddResult(false);
-                    return result;
-                }
-
-                _context.InvoiceLines.Remove(existing);
-                await _context.SaveChangesAsync(cancellationToken);
-                result.AddResult(true);
-            }
-            catch (Exception ex)
-            {
-                result.AddException(ex);
-            }
-            return result;
+            return domainEntity.LineId;
         }
     }
 }
