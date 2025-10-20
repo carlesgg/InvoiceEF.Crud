@@ -1,12 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using InvoiceEF.Crud.Domain.Entities;
+using InvoiceEF.Crud.Infrastructure.Data;
 
 namespace InvoiceEF.Crud.Infrastructure.Context.Configurations
 {
-    public class CompanyConfiguration : IEntityTypeConfiguration<CompanyEntity>
+    public class CompanyConfiguration : IEntityTypeConfiguration<Company>
     {
-        public void Configure(EntityTypeBuilder<CompanyEntity> builder)
+        public void Configure(EntityTypeBuilder<Company> builder)
         {
             builder.ToTable("Company");
 

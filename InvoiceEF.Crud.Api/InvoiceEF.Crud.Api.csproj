@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.UI" Version="8.0.2" />
+    <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="8.0.1" />
+    <PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="8.0.1" />
+    <PackageReference Include="FluentValidation" Version="12.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.21">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -20,7 +24,6 @@
   <ItemGroup>
     <ProjectReference Include="..\InvoiceEF.Crud.Application.Services\InvoiceEF.Crud.Application.Services.csproj" />
     <ProjectReference Include="..\InvoiceEF.Crud.CrossCutting\InvoiceEF.Crud.CrossCutting.csproj" />
-    <ProjectReference Include="..\InvoiceEF.Crud.Domain.Services\InvoiceEF.Crud.Domain.Services.csproj" />
     <ProjectReference Include="..\InvoiceEF.Crud.Infrastructure.Repositories\InvoiceEF.Crud.Infrastructure.Repositories.csproj" />
   </ItemGroup>
 

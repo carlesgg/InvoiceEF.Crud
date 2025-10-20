@@ -7,16 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="8.0.1" />
+    <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.21" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\InvoiceEF.Crud.Application.Mappers\InvoiceEF.Crud.Application.Mappers.csproj" />
     <ProjectReference Include="..\InvoiceEF.Crud.Domain.Contracts\InvoiceEF.Crud.Domain.Contracts.csproj" />
     <ProjectReference Include="..\InvoiceEF.Crud.Domain.Entities\InvoiceEF.Crud.Domain.Entities.csproj" />
-    <ProjectReference Include="..\InvoiceEF.Crud.Domain.Services\InvoiceEF.Crud.Domain.Services.csproj" />
     <ProjectReference Include="..\InvoiceEF.Crud.Infrastructure.Base\InvoiceEF.Crud.Infrastructure.Base.csproj" />
-    <ProjectReference Include="..\InvoiceEF.Crud.Infrastructure.Context\InvoiceEF.Crud.Infrastructure.Context.csproj" />
-    <ProjectReference Include="..\InvoiceEF.Crud.Infrastructure.Data\InvoiceEF.Crud.Infrastructure.Data.csproj" />
     <ProjectReference Include="..\InvoiceEF.Crud.Infrastructure.Proxies\InvoiceEF.Crud.Infrastructure.Proxies.csproj" />
   </ItemGroup>
 

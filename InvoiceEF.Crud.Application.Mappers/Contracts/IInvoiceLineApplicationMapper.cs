@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InvoiceEF.Crud.Application.Dtos.Responses.Client
+namespace InvoiceEF.Crud.Application.Mappers.Contracts
 {
-    public class ClientResponse
+    public interface IInvoiceLineApplicationMapper
     {
     }
 }

@@ -7,7 +7,7 @@ namespace InvoiceEF.Crud.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class InvoiceLineController(IInvoiceLineService invoiceLineService) : ControllerBase
+    public class InvoiceLineController(IInvoiceLineService invoiceLineService) : BaseController
     {
         private readonly IInvoiceLineService _invoiceLineService = invoiceLineService;
 

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InvoiceEF.Crud.Infrastructure.Proxies
+namespace InvoiceEF.Crud.Application.Dtos.Responses.Client
 {
-    public class ForbesProxy(IHttpClientFactory _httpClientFactory) : IForbesProxy
+    public class ClientResponseDto
     {
     }
 }

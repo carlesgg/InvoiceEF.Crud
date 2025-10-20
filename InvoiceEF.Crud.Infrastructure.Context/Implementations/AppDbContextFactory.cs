@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace InvoiceEF.Crud.Infrastructure.Context.Implementations
 {
-    public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
+    /*public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
     {
         public AppDbContext CreateDbContext(string[] args)
         {
@@ -14,12 +14,12 @@ namespace InvoiceEF.Crud.Infrastructure.Context.Implementations
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            var connectionString = configuration.GetConnectionString("InvoiceDocker2");
+            var connectionString = configuration.GetConnectionString("InvoiceDocker");
 
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
             optionsBuilder.UseSqlServer(connectionString);
 
             return new AppDbContext(optionsBuilder.Options);
         }
-    }
+}*/
 }

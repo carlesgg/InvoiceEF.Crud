@@ -5,7 +5,7 @@
         public T? Result { get; set; }
         public List<Error> Errors { get; set; } = [];
         public Exception? Exception { get; set; }
-        public bool HasErrors => Errors.Count >= 0;
+        public bool HasErrors => Errors.Count > 0;
     }
 
     public record Error(int Code, string Message = "");

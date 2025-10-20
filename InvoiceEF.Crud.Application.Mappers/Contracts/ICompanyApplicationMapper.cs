@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InvoiceEF.Crud.Domain.Contracts
+namespace InvoiceEF.Crud.Application.Mappers.Contracts
 {
-    public interface IForbesProxy
+    public interface ICompanyApplicationMapper
     {
-
     }
 }

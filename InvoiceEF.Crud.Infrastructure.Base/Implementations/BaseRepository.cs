@@ -24,7 +24,7 @@ namespace InvoiceEF.Crud.Infrastructure.Base.Implementations
             var result = new OperationResult<IEnumerable<TEntity>>();
             try
             {
-                var models = await _dbSet.ToListAsync(cancellationToken);
+                var models = await _dbSet.AsNoTracking().ToListAsync(cancellationToken); // Add AsNoTracking for read-only queries
                 var domains = models.Select(e => _mapper.MapToDomain(e)).ToList();
                 result.AddResult(domains);
             }
@@ -79,7 +79,7 @@ namespace InvoiceEF.Crud.Infrastructure.Base.Implementations
             try
             {
                 var id = GetId(domainEntity);
-                var existingModel = await _dbSet.FindAsync([id], cancellationToken);
+                var existingModel = await _dbSet.FindAsync(id, cancellationToken);
                 if (existingModel == null)
                 {
                     result.AddError(404, $"{typeof(TModel).Name} not found");

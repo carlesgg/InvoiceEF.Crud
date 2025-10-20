@@ -5,9 +5,9 @@ VisualStudioVersion = 17.14.36518.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1. Distributed Services", "1. Distributed Services", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2. Business", "2. Business", "{83FCECF0-8F31-41DA-9E7E-BCA0EE7F1DA5}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2. Application", "2. Application", "{83FCECF0-8F31-41DA-9E7E-BCA0EE7F1DA5}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3. Infrastructure", "3. Infrastructure", "{444DE8F7-C48E-48C8-9D3F-7DDEEAF873F5}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4. Infrastructure", "4. Infrastructure", "{444DE8F7-C48E-48C8-9D3F-7DDEEAF873F5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5. XCutting", "5. XCutting", "{A0F530F9-7D74-40CD-8F87-8F4BE6D66089}"
 EndProject
@@ -19,7 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvoiceEF.Crud.Infrastructu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvoiceEF.Crud.Domain.Entities", "InvoiceEF.Crud.Domain.Entities\InvoiceEF.Crud.Domain.Entities.csproj", "{74122DDE-A633-4B08-9EC4-65018D6EBFDF}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4. Domain", "4. Domain", "{95453280-9889-483A-BA35-6D37CD85C907}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3. Domain", "3. Domain", "{95453280-9889-483A-BA35-6D37CD85C907}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvoiceEF.Crud.CrossCutting", "InvoiceEF.Crud.CrossCutting\InvoiceEF.Crud.CrossCutting.csproj", "{B2574FB6-6C05-472E-A8F7-9679C5E005EC}"
 EndProject
@@ -40,6 +40,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvoiceEF.Crud.Infrastructure.Mappers", "InvoiceEF.Crud.Infrastructure.Mappers\InvoiceEF.Crud.Infrastructure.Mappers.csproj", "{077AFDAE-68DE-4A5C-9B83-DF879CF57945}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvoiceEF.Crud.Application.Mappers", "InvoiceEF.Crud.Application.Mappers\InvoiceEF.Crud.Application.Mappers.csproj", "{28689477-375C-46C3-B6FA-66871DBCFA8B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "6. Tests", "6. Tests", "{7556404D-F09B-4266-91B9-2E9671A6C0E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvoiceEF.Crud.Infrastructure.Repositories.Unit.Tests", "InvoiceEF.Crud.Infrastructure.Repositories.Unit.Tests\InvoiceEF.Crud.Infrastructure.Repositories.Unit.Tests.csproj", "{B61B88F0-FF0E-4300-9ED1-CB22753835EC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -103,6 +107,10 @@ Global
 		{28689477-375C-46C3-B6FA-66871DBCFA8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28689477-375C-46C3-B6FA-66871DBCFA8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28689477-375C-46C3-B6FA-66871DBCFA8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B61B88F0-FF0E-4300-9ED1-CB22753835EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B61B88F0-FF0E-4300-9ED1-CB22753835EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B61B88F0-FF0E-4300-9ED1-CB22753835EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B61B88F0-FF0E-4300-9ED1-CB22753835EC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -122,6 +130,7 @@ Global
 		{1DB1268A-E897-3662-BC9A-0214F1ABF0B2} = {83FCECF0-8F31-41DA-9E7E-BCA0EE7F1DA5}
 		{077AFDAE-68DE-4A5C-9B83-DF879CF57945} = {444DE8F7-C48E-48C8-9D3F-7DDEEAF873F5}
 		{28689477-375C-46C3-B6FA-66871DBCFA8B} = {83FCECF0-8F31-41DA-9E7E-BCA0EE7F1DA5}
+		{B61B88F0-FF0E-4300-9ED1-CB22753835EC} = {7556404D-F09B-4266-91B9-2E9671A6C0E4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {85FFA746-1526-44E3-A0CF-C3E50723FEE9}

@@ -2,7 +2,7 @@
 {
     public interface IMapper<TDomain, TModel>
     {
-        TDomain MapToDomain(TModel dataModel);
+        TDomain MapToDomain(TModel model);
         TModel MapToDataModel(TDomain domainEntity);
     }
 }

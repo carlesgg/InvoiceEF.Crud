@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InvoiceEF.Crud.Application.Dtos.Requests.Client
+namespace InvoiceEF.Crud.Application.Dtos.Requests.Company
 {
-    public class CreateClientRequests
+    public record CompanyUpdateDto
     {
     }
 }

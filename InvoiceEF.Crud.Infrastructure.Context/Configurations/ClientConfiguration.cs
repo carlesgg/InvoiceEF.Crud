@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using InvoiceEF.Crud.Domain.Entities;
 using InvoiceEF.Crud.Infrastructure.Data;
 
 namespace InvoiceEF.Crud.Infrastructure.Context.Configurations

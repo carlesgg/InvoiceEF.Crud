@@ -1,6 +1,5 @@
 ﻿using InvoiceEF.Crud.CrossCutting;
 using InvoiceEF.Crud.Domain.Entities;
-using InvoiceEF.Crud.Infrastructure.Data;
 
 namespace InvoiceEF.Crud.Domain.Contracts
 {

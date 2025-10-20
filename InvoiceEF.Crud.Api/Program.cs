@@ -1,9 +1,13 @@
+using HealthChecks.UI.Client;
+using InvoiceEF.Crud.Api.HealthChecks;
 using InvoiceEF.Crud.Application.Services.Extensions;
+using InvoiceEF.Crud.Infrastructure.Proxies.Extensions;
 using InvoiceEF.Crud.Infrastructure.Repositories.Extensions;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("InvoiceDocker2");
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -11,8 +15,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddApplicationLayer();
-builder.Services.AddInfrastructureLayer(connectionString!);
+builder.Services.AddApplicationLayer(builder.Configuration);
+builder.Services.AddProxies();
+builder.Services.AddInfrastructureLayer(builder.Configuration);
+
+// Register HealthChecks UI
+builder.Services.AddHealthChecksUISetup();
 
 var app = builder.Build();
 
@@ -28,5 +36,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Map HealthChecks endpoints + UI
+app.MapHealthChecksUISetup();
 
 app.Run();

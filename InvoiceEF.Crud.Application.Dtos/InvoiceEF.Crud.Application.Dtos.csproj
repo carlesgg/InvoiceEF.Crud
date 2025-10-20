@@ -13,8 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\InvoiceEF.Crud.Domain.Entities\InvoiceEF.Crud.Domain.Entities.csproj" />
-    <ProjectReference Include="..\InvoiceEF.Crud.Infrastructure.Repositories\InvoiceEF.Crud.Infrastructure.Repositories.csproj" />
+    <Folder Include="Responses\Forbes\" />
   </ItemGroup>
 
 </Project>
