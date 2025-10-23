@@ -11,9 +11,11 @@
     <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.21" />
+    <PackageReference Include="Serilog" Version="3.1.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\InvoiceEF.Crud.Application.Bases\InvoiceEF.Crud.Application.Bases.csproj" />
     <ProjectReference Include="..\InvoiceEF.Crud.Application.Mappers\InvoiceEF.Crud.Application.Mappers.csproj" />
     <ProjectReference Include="..\InvoiceEF.Crud.Domain.Contracts\InvoiceEF.Crud.Domain.Contracts.csproj" />
     <ProjectReference Include="..\InvoiceEF.Crud.Domain.Entities\InvoiceEF.Crud.Domain.Entities.csproj" />

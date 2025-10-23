@@ -12,30 +12,30 @@ namespace InvoiceEF.Crud.Api.HealthChecks
             // Register the UI and in-memory storage
             services.AddHealthChecksUI(options =>
             {
-                options.SetEvaluationTimeInSeconds(15);   // refresh interval
+                options.SetEvaluationTimeInSeconds(15);   
                 options.MaximumHistoryEntriesPerEndpoint(60);
-                options.AddHealthCheckEndpoint("Invoice API", "/health/ready"); // endpoint to monitor
+                options.AddHealthCheckEndpoint("Invoice API", "/health/ready"); 
             })
-            .AddInMemoryStorage(); // required!
+            .AddInMemoryStorage(); 
         }
 
         public static void MapHealthChecksUISetup(this WebApplication app)
         {
-            // Liveness endpoint
+            // Live Endpoint
             app.MapHealthChecks("/health/live", new HealthCheckOptions
             {
-                Predicate = _ => false, // only self-check
+                Predicate = _ => false, 
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
 
-            // Readiness endpoint (includes all checks)
+            // Ready Endpoint
             app.MapHealthChecks("/health/ready", new HealthCheckOptions
             {
                 Predicate = _ => true, // include all registered checks
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
 
-            // Map the visual dashboard
+            // Visual Endpoint
             app.MapHealthChecksUI(options =>
             {
                 options.UIPath = "/health-ui";       // browser path

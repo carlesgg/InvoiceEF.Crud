@@ -9,14 +9,9 @@ namespace InvoiceEF.Crud.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ForbesController : ControllerBase
+    public class ForbesController(IForbesService forbesService) : ControllerBase
     {
-        private readonly IForbesService _forbesService;
-
-        public ForbesController(IForbesService forbesService)
-        {
-            _forbesService = forbesService;
-        }
+        private readonly IForbesService _forbesService = forbesService;
 
         [HttpGet("list")]
         public async Task<IActionResult> GetList(CancellationToken cancellationToken)

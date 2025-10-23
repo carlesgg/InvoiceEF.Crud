@@ -2,6 +2,7 @@
 using System.Threading;
 using InvoiceEF.Crud.Application.Services.Contracts;
 using InvoiceEF.Crud.Domain.Entities;
+using InvoiceEF.Crud.CrossCutting;
 
 namespace InvoiceEF.Crud.Api.Controllers
 {
@@ -20,7 +21,8 @@ namespace InvoiceEF.Crud.Api.Controllers
             if (result.HasErrors)
                 return BadRequest(result.Errors);
 
-            return Ok(result.Result);
+            
+            return result.ToAction(HttpVerb.GET);
         }
 
         // GET: api/Company/{id}

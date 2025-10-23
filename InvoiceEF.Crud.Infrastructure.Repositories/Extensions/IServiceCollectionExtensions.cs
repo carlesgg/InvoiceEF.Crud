@@ -9,6 +9,7 @@ using InvoiceEF.Crud.Infrastructure.Repositories.Implementations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 
 namespace InvoiceEF.Crud.Infrastructure.Repositories.Extensions
 {
@@ -17,6 +18,7 @@ namespace InvoiceEF.Crud.Infrastructure.Repositories.Extensions
         public static void AddInfrastructureLayer(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddRepositoriesLayer(configuration);
+            services.AddRedisCacheService(configuration);
         }
 
         public static void AddRepositoriesLayer(this IServiceCollection services, IConfiguration configuration)
@@ -47,6 +49,22 @@ namespace InvoiceEF.Crud.Infrastructure.Repositories.Extensions
                         }
                     )
                 );
+        }
+
+        private static void AddRedisCacheService(this IServiceCollection services, IConfiguration configuration)
+        {
+            var redisConnectionString = configuration.GetConnectionString("RedisConnection");
+
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisConnectionString;
+                options.InstanceName = "InvoiceForbes";
+            });
+
+            services.AddSingleton<IConnectionMultiplexer>(sp =>
+                ConnectionMultiplexer.Connect(redisConnectionString!));
+            
+            services.AddScoped<ICacheService, RedisCacheService>();
         }
     }
 }

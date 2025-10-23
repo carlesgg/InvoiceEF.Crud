@@ -1,4 +1,5 @@
-﻿using InvoiceEF.Crud.Infrastructure.Proxies.Dtos;
+﻿using InvoiceEF.Crud.CrossCutting;
+using InvoiceEF.Crud.Infrastructure.Proxies.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,6 @@ namespace InvoiceEF.Crud.Infrastructure.Proxies.Contracts
 {
     public interface IForbesProxy
     {
-        Task<IEnumerable<ForbesPersonDto>> GetListAsync(CancellationToken cancellationToken);
+        Task<OperationResult<IEnumerable<ForbesPersonDto>>> GetListAsync(CancellationToken cancellationToken);
     }
 }

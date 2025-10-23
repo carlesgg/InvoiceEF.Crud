@@ -9,7 +9,7 @@ services:
       MSSQL_SA_PASSWORD: "Triggerdb!!!!"
       MSSQL_PID: "Developer"   # Cambia a "Express" o "Standard" si corresponde
     ports:
-      - "1433:1433"
+      - "15000:1433"
     volumes:
       - sqlserver_data:/var/opt/mssql
     restart: unless-stopped

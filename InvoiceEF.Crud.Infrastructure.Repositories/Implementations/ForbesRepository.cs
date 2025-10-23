@@ -67,7 +67,6 @@ namespace InvoiceEF.Crud.Infrastructure.Repositories.Implementations
                 }
 
                 _dbSet.RemoveRange(entities);
-                await _context.SaveChangesAsync(cancellationToken);
                 if (entities.Count == 0)
                 {
 

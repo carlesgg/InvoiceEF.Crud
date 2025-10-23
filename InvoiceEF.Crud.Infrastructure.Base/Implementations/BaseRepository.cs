@@ -59,69 +59,47 @@ namespace InvoiceEF.Crud.Infrastructure.Base.Implementations
         public virtual async Task<OperationResult<TEntity>> AddAsync(TEntity entity, CancellationToken cancellationToken)
         {
             var result = new OperationResult<TEntity>();
-            try
-            {
-                var model = _mapper.MapToDataModel(entity);
-                await _dbSet.AddAsync(model, cancellationToken);
-                
-                result.AddResult(entity);
-            }
-            catch (Exception ex)
-            {
-                result.AddException(ex);
-            }
+
+            var model = _mapper.MapToDataModel(entity);
+            await _dbSet.AddAsync(model, cancellationToken);
+
+            result.AddResult(entity);
             return result;
         }
 
         public virtual async Task<OperationResult<TEntity>> UpdateAsync(TEntity domainEntity, CancellationToken cancellationToken)
         {
             var result = new OperationResult<TEntity>();
-            try
+
+            var id = GetId(domainEntity);
+            var existingModel = await _dbSet.FindAsync(id, cancellationToken);
+            if (existingModel == null)
             {
-                var id = GetId(domainEntity);
-                var existingModel = await _dbSet.FindAsync(id, cancellationToken);
-                if (existingModel == null)
-                {
-                    result.AddError(404, $"{typeof(TModel).Name} not found");
-                    return result;
-                }
-
-                // Map updated domain data onto the existing model
-                UpdateEntity(existingModel, domainEntity);
-
-                _dbSet.Update(existingModel);
-                
-
-                result.AddResult(domainEntity);
+                result.AddError(404, $"{typeof(TModel).Name} not found");
+                return result;
             }
-            catch (Exception ex)
-            {
-                result.AddException(ex);
-            }
+
+            UpdateEntity(existingModel, domainEntity);
+            _dbSet.Update(existingModel);
+
+            result.AddResult(domainEntity);
             return result;
         }
 
         public virtual async Task<OperationResult<bool>> DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
             var result = new OperationResult<bool>();
-            try
-            {
-                var model = await _dbSet.FindAsync([id], cancellationToken);
-                if (model == null)
-                {
-                    result.AddError(404, $"{typeof(TModel).Name} not found");
-                    result.AddResult(false);
-                    return result;
-                }
 
-                _dbSet.Remove(model);
-                
-                result.AddResult(true);
-            }
-            catch (Exception ex)
+            var model = await _dbSet.FindAsync(id, cancellationToken);
+            if (model == null)
             {
-                result.AddException(ex);
+                result.AddError(404, $"{typeof(TModel).Name} not found");
+                result.AddResult(false);
+                return result;
             }
+
+            _dbSet.Remove(model);
+            result.AddResult(true);
             return result;
         }
 

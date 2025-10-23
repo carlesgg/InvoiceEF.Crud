@@ -1,6 +1,6 @@
 ﻿using InvoiceEF.Crud.Application.Services.Contracts;
 using InvoiceEF.Crud.Application.Services.Implementations;
-using InvoiceEF.Crud.Application.Services.Mappers.Implementations;
+using InvoiceEF.Crud.Application.Mappers.Implementations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -12,7 +12,7 @@ namespace InvoiceEF.Crud.Application.Services.Extensions
         public static void AddApplicationLayer(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddServicesLayer();
-            services.AddHealthChecks(configuration);
+            services.AddHealthChecksService(configuration);
 
 
         }
@@ -25,14 +25,14 @@ namespace InvoiceEF.Crud.Application.Services.Extensions
                 .AddScoped<ICompanyService, CompanyService>()
                 .AddScoped<IInvoiceService, InvoiceService>()
                 .AddScoped<IInvoiceLineService, InvoiceLineService>()
-                .AddScoped<IForbesService, ForbesService>()
-                .AddScoped<ForbesDtoToDomainMapper>();
+                .AddScoped<IForbesService, ForbesService>();
+
             services 
                 .AddHostedService<ForbesSeeder>();
 
         }
 
-        public static void AddHealthChecks(this IServiceCollection services, IConfiguration configuration)
+        public static void AddHealthChecksService(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddHealthChecks()
                 .AddCheck("Api", () => HealthCheckResult.Healthy("API is running"))

@@ -27,21 +27,6 @@ namespace InvoiceEF.Crud.Infrastructure.Context.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Companies",
-                columns: table => new
-                {
-                    CompanyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Direction = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Companies", x => x.CompanyId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Company",
                 columns: table => new
                 {
@@ -54,6 +39,31 @@ namespace InvoiceEF.Crud.Infrastructure.Context.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Company", x => x.CompanyId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ForbesPeople",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Uri = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Rank = table.Column<int>(type: "int", nullable: false),
+                    ListUri = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    ImageExists = table.Column<bool>(type: "bit", nullable: false),
+                    FinalWorth = table.Column<double>(type: "float", nullable: false),
+                    PersonName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Source = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    Industries = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    CountryOfCitizenship = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Gender = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
+                    BirthDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    EstWorthPrev = table.Column<double>(type: "float", nullable: false),
+                    SquareImage = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ForbesPeople", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -106,10 +116,10 @@ namespace InvoiceEF.Crud.Infrastructure.Context.Migrations
                 name: "Clients");
 
             migrationBuilder.DropTable(
-                name: "Companies");
+                name: "Company");
 
             migrationBuilder.DropTable(
-                name: "Company");
+                name: "ForbesPeople");
 
             migrationBuilder.DropTable(
                 name: "InvoiceLines");

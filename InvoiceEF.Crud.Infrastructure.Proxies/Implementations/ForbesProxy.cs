@@ -1,48 +1,81 @@
 ﻿using InvoiceEF.Crud.CrossCutting;
 using InvoiceEF.Crud.Infrastructure.Proxies.Contracts;
 using InvoiceEF.Crud.Infrastructure.Proxies.Dtos;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace InvoiceEF.Crud.Infrastructure.Proxies.Implementations
 {
-    public class ForbesProxy : IForbesProxy
+    public class ForbesProxy(IHttpClientFactory httpClientFactory, ILogger<ForbesProxy> logger) : IForbesProxy
     {
-        private readonly HttpClient _httpClient;
-
-        public ForbesProxy(HttpClient httpClient)
+        private readonly ILogger<ForbesProxy> _logger = logger;
+        private readonly HttpClient _httpClient = httpClientFactory.CreateClient("ForbesProxy");
+        public async Task<OperationResult<IEnumerable<ForbesPersonDto>>> GetListAsync(CancellationToken cancellationToken)
         {
-            _httpClient = httpClient;
-        }
+            var operationResult = new OperationResult<IEnumerable<ForbesPersonDto>>();
 
-        public async Task<IEnumerable<ForbesPersonDto>> GetListAsync(CancellationToken cancellationToken)
-        {
-            using var response = await _httpClient.GetAsync("list", cancellationToken);
-            response.EnsureSuccessStatusCode();
-
-            var json = await response.Content.ReadAsStringAsync(cancellationToken);
-
-            // 🔹 Debug: mostrar el JSON recibido
-            Console.WriteLine("JSON recibido de Forbes API:");
-            Console.WriteLine(json);
-
-            IEnumerable<ForbesPersonDto>? list = null;
             try
             {
-                // 🔹 Debug: intentar deserializar
-                list = json.Deserialize<IEnumerable<ForbesPersonDto>>();
-                Console.WriteLine($"Se deserializaron {list?.Count() ?? 0} elementos.");
+                _logger.LogInformation("Calling Forbes API to get the list...");
+
+                using var response = await _httpClient.GetAsync("list", cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("Forbes API returned HTTP {StatusCode}", response.StatusCode);
+                    return operationResult
+                        .AddError((int)response.StatusCode, $"Forbes API returned error: {response.StatusCode}");
+                }
+
+                var json = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                try
+                {
+                    var list = JsonSerializer.Deserialize<IEnumerable<ForbesPersonDto>>(json, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    if (list is null)
+                    {
+                        _logger.LogWarning("Deserialized list was null");
+                        return operationResult
+                            .AddError(1001, "Deserialized list was null")
+                            .AddResult([]);
+                    }
+
+                    _logger.LogInformation("Successfully deserialized {Count} Forbes entries", list.Count());
+                    return operationResult.AddResult(list);
+                }
+                catch (JsonException jsonEx)
+                {
+                    _logger.LogError(jsonEx, "Error deserializing JSON from Forbes API");
+                    return operationResult
+                        .AddError(1002, "Error deserializing JSON response.")
+                        .AddException(jsonEx);
+                }
+            }
+            catch (TaskCanceledException tcex)
+            {
+                _logger.LogWarning(tcex, "Forbes API request was canceled");
+                return operationResult
+                    .AddError(1004, "Forbes API request was canceled.")
+                    .AddException(tcex);
+            }
+            catch (HttpRequestException httpEx)
+            {
+                _logger.LogError(httpEx, "Network error calling Forbes API");
+                return operationResult
+                    .AddError(1003, "Network error calling Forbes API.")
+                    .AddException(httpEx);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error deserializando Forbes API:");
-                Console.WriteLine(ex);
+                _logger.LogError(ex, "Unexpected error in ForbesProxy");
+                return operationResult
+                    .AddError(9999, "Unexpected error in ForbesProxy.")
+                    .AddException(ex);
             }
-
-            return list ?? new List<ForbesPersonDto>();
         }
     }
 }

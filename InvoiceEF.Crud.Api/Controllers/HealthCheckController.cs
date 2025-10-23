@@ -5,14 +5,9 @@ namespace InvoiceEF.Crud.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class HealthCheckController : ControllerBase
+    public class HealthCheckController(HealthCheckService healthCheckService) : ControllerBase
     {
-        private readonly HealthCheckService _healthCheckService;
-
-        public HealthCheckController(HealthCheckService healthCheckService)
-        {
-            _healthCheckService = healthCheckService;
-        }
+        private readonly HealthCheckService _healthCheckService = healthCheckService;
 
         [HttpGet]
         public async Task<IActionResult> Get()

@@ -1,77 +1,190 @@
-﻿using InvoiceEF.Crud.Application.Services.Contracts;
-using InvoiceEF.Crud.Application.Services.Mappers.Implementations;
+﻿using InvoiceEF.Crud.Application.Mappers.Implementations;
+using InvoiceEF.Crud.Application.Services.Contracts;
+using InvoiceEF.Crud.Application.Services.Implementations;
+using InvoiceEF.Crud.CrossCutting;
 using InvoiceEF.Crud.Domain.Contracts;
 using InvoiceEF.Crud.Infrastructure.Base.Contracts;
 using InvoiceEF.Crud.Infrastructure.Base.Implementations;
 using InvoiceEF.Crud.Infrastructure.Proxies.Contracts;
 using InvoiceEF.Crud.Infrastructure.Proxies.Dtos;
 using InvoiceEF.Crud.Infrastructure.Proxies.Implementations;
+using Microsoft.Extensions.Logging;
+using System.ClientModel.Primitives;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace InvoiceEF.Crud.Application.Services.Implementations
 {
-    public class ForbesService(IForbesProxy forbesProxy, IForbesRepository forbesRepository, IUnitOfWork unitOfWork, ForbesDtoToDomainMapper mapper) : IForbesService
+    public class ForbesService(
+        ILogger<ForbesService> logger,
+        IForbesProxy forbesProxy, 
+        IForbesRepository forbesRepository, 
+        ICacheService cache, 
+        IUnitOfWork unitOfWork 
+    ) : IForbesService
     {
+        private readonly ILogger<ForbesService> _logger = logger;
         private readonly IForbesProxy _forbesProxy = forbesProxy;
-        private readonly ForbesDtoToDomainMapper _mapper = mapper;
         private readonly IForbesRepository _repository = forbesRepository; 
+        private readonly ICacheService _cache = cache;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-        public async Task<IEnumerable<ForbesPersonDto>> GetBillionairesAsync(CancellationToken cancellationToken)
-        {
-            return await _forbesProxy.GetListAsync(cancellationToken);
-        }
+        private const string CacheKey_Billionaires = "billionaires_list";
 
-        public async Task SaveBillionairesAsync(IEnumerable<ForbesPersonDto> dtos, CancellationToken cancellationToken)
+        public async Task<OperationResult<IEnumerable<ForbesPersonDto>>> GetBillionairesAsync(CancellationToken cancellationToken)
         {
-            var entities = dtos.Select(dto => _mapper.Map(dto));
+            var operation = new OperationResult<IEnumerable<ForbesPersonDto>>();
 
-            foreach (var entity in entities)
+            // Try from cache
+            var cached = await _cache.GetAsync<string>(CacheKey_Billionaires);
+            if (!string.IsNullOrEmpty(cached))
             {
-                await _repository.AddAsync(entity, cancellationToken);
+                var list = JsonSerializer.Deserialize<IEnumerable<ForbesPersonDto>>(cached);
+                if (list != null)
+                {
+                    _logger.LogInformation("Returning Forbes list from cache.");
+                    return operation.AddResult(list);
+                }
             }
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-        }
+            // Fetch from API (proxy)
+            var proxyResult = await _forbesProxy.GetListAsync(cancellationToken);
 
-        public async Task<ForbesPersonDto?> GetBillionaireByRankAsync(int rank, CancellationToken cancellationToken)
-        {
-            var entity = await _repository.GetBillionaireByRankAsync(rank, cancellationToken);
-            if (entity == null) return null;
-
-            // Convertimos la entidad de dominio de nuevo a DTO
-            return new ForbesPersonDto
+            if (proxyResult.HasErrors || proxyResult.Result == null)
             {
-                Uri = entity.Uri,
-                Rank = entity.Rank,
-                ListUri = entity.ListUri,
-                ImageExists = entity.ImageExists,
-                FinalWorth = entity.FinalWorth,
-                PersonName = entity.PersonName,
-                Source = entity.Source,
-                Industries = entity.Industries?.Split(',').ToList(),
-                CountryOfCitizenship = entity.CountryOfCitizenship,
-                Gender = entity.Gender,
-                BirthDate = entity.BirthDate.HasValue
-                            ? new DateTimeOffset(entity.BirthDate.Value).ToUnixTimeMilliseconds()
-                            : null,
-                LastName = entity.LastName,
-                EstWorthPrev = entity.EstWorthPrev,
-                SquareImage = entity.SquareImage
-            };
+                return operation
+                    .AddError(1005, "Failed to retrieve Forbes list from proxy.")
+                    .AddErrors(proxyResult.Errors)
+                    .AddException(proxyResult.Exception!);
+            }
+
+            // Save to cache (store only data)
+            var json = JsonSerializer.Serialize(proxyResult.Result);
+            await _cache.SetAsync(CacheKey_Billionaires, json, TimeSpan.FromMinutes(30));
+
+            return operation.AddResult(proxyResult.Result);
         }
 
-        public async Task DropDatabaseAsync(CancellationToken cancellationToken)
+
+        public async Task<OperationResult<bool>> SaveBillionairesAsync(
+            IEnumerable<ForbesPersonDto> dtos,
+            CancellationToken cancellationToken)
         {
+            var operation = new OperationResult<bool>();
+
+            try
+            {
+                var entities = dtos.Select(dto => ForbesApplicationMapper.ToEntity(dto)).ToList();
+
+                await _unitOfWork.BeginTransactionAsync(cancellationToken);
+                foreach (var entity in entities)
+                {
+                    await _repository.AddAsync(entity, cancellationToken);
+                }
+
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                await _unitOfWork.CommitTransactionAsync(cancellationToken);
+                _logger.LogInformation("Insert completed!");
+
+                // Update cache
+                var json = JsonSerializer.Serialize(dtos);
+                await _cache.SetAsync(CacheKey_Billionaires, json, TimeSpan.FromMinutes(30));
+
+                return operation.AddResult(true);
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+                _logger.LogError(ex, "Error saving billionaires");
+                return operation.AddException(ex);
+            }
+        }
+
+        public async Task<OperationResult<ForbesPersonDto?>> GetBillionaireByRankAsync(int rank, CancellationToken cancellationToken)
+        {
+            var operation = new OperationResult<ForbesPersonDto?>();
+
+            var cachedList = await _cache.GetAsync<string>(CacheKey_Billionaires);
+            if (!string.IsNullOrEmpty(cachedList))
+            {
+                var list = JsonSerializer.Deserialize<IEnumerable<ForbesPersonDto>>(cachedList);
+                var dto = list?.FirstOrDefault(f => f.Rank == rank);
+                if (dto != null)
+                {
+                    return operation.AddResult(dto);
+                }
+            }
+
+            var entity = await _repository.GetBillionaireByRankAsync(rank, cancellationToken);
+            if (entity == null)
+                return operation.AddError(404, $"No billionaire found with rank {rank}");
+
+            var resultDto = ForbesApplicationMapper.ToResponseDto(entity);
+
+            await _cache.SetAsync($"{CacheKey_Billionaires}_rank_{rank}",
+                JsonSerializer.Serialize(resultDto),
+                TimeSpan.FromMinutes(30));
+
+            return operation.AddResult(resultDto);
+        }
+
+        public async Task<OperationResult<string>> DeleteAllAsync(CancellationToken cancellationToken)
+        {
+            var operation = new OperationResult<string>();
+
             await _unitOfWork.BeginTransactionAsync(cancellationToken);
             try
             {
                 await _repository.DeleteAllAsync(cancellationToken);
                 await _unitOfWork.CommitTransactionAsync(cancellationToken);
+                _logger.LogInformation("Delete completed!");
+
+                await _cache.RemoveAsync(CacheKey_Billionaires);
+
+                return operation.AddResult("All billionaires deleted successfully.");
             }
-            catch
+            catch (Exception ex)
             {
                 await _unitOfWork.RollbackTransactionAsync(cancellationToken);
-                throw;
+                _logger.LogError(ex, "Error deleting billionaires.");
+                return operation.AddError(2002, "Failed to delete billionaires.").AddException(ex);
+            }
+        }
+
+
+        public async Task<OperationResult<bool>> DeleteAllAndSeedAsync(
+            OperationResult<IEnumerable<ForbesPersonDto>> dtos,
+            CancellationToken cancellationToken)
+        {
+            var operation = new OperationResult<bool>();
+
+            try
+            {
+                if (dtos.Result == null)
+                    return operation.AddError(400, "No data to seed.");
+
+                await _repository.DeleteAllAsync(cancellationToken);
+
+                foreach (var dto in dtos.Result)
+                {
+                    var entity = ForbesApplicationMapper.ToEntity(dto);
+                    await _repository.AddAsync(entity, cancellationToken);
+                }
+
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                _logger.LogInformation("Delete + Insert completed!");
+
+                // Update cache
+                await _cache.SetAsync(CacheKey_Billionaires,
+                    JsonSerializer.Serialize(dtos.Result),
+                    TimeSpan.FromMinutes(30));
+
+                return operation.AddResult(true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting and inserting ForbesPerson entities");
+                return operation.AddException(ex);
             }
         }
     }
